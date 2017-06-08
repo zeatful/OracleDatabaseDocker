@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <version>0.0.1</version>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>com.zeatful</artifactId>
+    <groupId>oracle-database-docker-encapsulated</groupId>
+    <packaging>pom</packaging>
+    <name>Oracle Database Docker Encapsulated</name>
+
+    <properties>
+        <!-- Oracle Version to build a docker image, requires that specific version folder under the dockerfiles directory and all files/zips required to install or build -->
+        <oracle.database.version>11.2.0.2</oracle.database.version>
+        <docker.image.prefix>oracle-${oracle.database.version}</docker.image.prefix>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>Generate Oracle Database Image</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>${basedir}/dockerfiles/buildDockerImage.sh</executable>
+                    <workingDirectory>${basedir}/dockerfiles/${oracle.database.version}</workingDirectory>
+                    <arguments>
+                        <argument>-v${oracle.database.version}</argument> <!-- specified version to install -->
+                        <argument>-x</argument> <!-- express edition -->
+                        <argument>-i</argument><!-- ignore MD5 check -->
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.11</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>dockerFiles/11.2.0.2</dockerDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
