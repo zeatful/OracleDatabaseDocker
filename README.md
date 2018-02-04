@@ -1,9 +1,22 @@
 Docker Oracle Database Image with Encapsulated Data
 ===============
 Allows a docker oracle database image to be created from maven, with data encapsulated specifically to the container.  Allows the 
-image to also be run from project through a maven command
+image to also be run from project through a maven command.  
 
-## QuickStart: How to build and run
+## Note about SnapShotting data
+Since this docker image is meant to persist data state as part of the container, import and export commands are included for managing snapshotting of data and easily rolling back.
+
+## Methods for importing data
+
+### Liquibase to seed databas
+Create the seed liquibase/sql statements in the project.  You can export your current data by using liquibase to create a baseline and use that as your seed.
+
+### Use Oracle data pump to import data to container
+#### Create a DBA account in your docker container oracle database
+#### Use data pump to get an export from your existing source oracle database
+#### Use data pump to import data to the docker container
+
+## QuickStart: How to build and run 
 
 ### Building Oracle Database Docker Install Images
 **IMPORTANT:** You will have to provide the installation binaries of Oracle Database and put them into the `OracleDatabase/dockerfiles/<version>/installer` folder. You only need to provide the binaries for the edition you are going to install. You also have to make sure to have internet connectivity for yum. Note that you must not uncompress the binaries. The script will handle that for you and fail if you uncompress them manually!
@@ -70,6 +83,24 @@ To run your Oracle Database Express Edition Docker image use the **docker run** 
 	               Has to be owned by the Unix user "oracle" or set appropriately.
 	               If omitted the database will not be persisted over container recreation.
 
+#### Exporting your container to an image (For snap-shotting)
+You may want to essentially export an image to preserve the encapuslated data.  You can do this through the docker export command, which will remove any meta data but results in a small image:
+
+	docker export -o ~/export.tar name-for-image:tag-for-image
+
+#### Importing your exported container as an image (For loading a snapshot)
+After you have exported a container to an image you can import it with the docker import command.  However, since it was exported and lost all metadata, it will not start and work correctly unless you specify the metadata required to run the command.  Run the command below to do so:
+
+	docker import --change "ENV ORACLE_BASE=/u01/app/oracle" 
+	--change "ENV ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe"
+	--change "ENV ORACLE_SID=XE"
+	--change "ENV CONFIG_RSP='xe.rsp'"
+	--change "ENV RUN_FILE='runOracle.sh'"
+	--change "ENV PWD_FILE='setPassword.sh'" 
+	--change "ENV PATH=$ORACLE_HOME/bin:$PATH" 
+	--change "EXPOSE 1521"
+	--change "CMD /u01/app/oracle/runOracle.sh"
+	name-for-image:tag-for-image < ~/export.tar
 
 ## License
 To download and run Oracle Database, regardless whether inside or outside a Docker container, you must download the binaries from the Oracle website and accept the license indicated at that page.
