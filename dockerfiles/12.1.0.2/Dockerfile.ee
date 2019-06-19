@@ -33,6 +33,8 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_HOME=/opt/oracle/product/12.1.0.2/dbhome_1 \
     INSTALL_FILE_1="linuxamd64_12102_database_1of2.zip" \
     INSTALL_FILE_2="linuxamd64_12102_database_2of2.zip" \
+    INSTALL_FILE_1_LOC="/installer/linuxamd64_12102_database_1of2.zip" \
+    INSTALL_FILE_2_LOC="/installer/linuxamd64_12102_database_2of2.zip" \
     INSTALL_RSP="db_inst.rsp" \
     CONFIG_RSP="dbca.rsp.tmpl" \
     PWD_FILE="setPassword.sh" \
@@ -47,7 +49,7 @@ ENV INSTALL_DIR=$ORACLE_BASE/install \
 
 # Copy binaries
 # -------------
-COPY $INSTALL_FILE_1 $INSTALL_FILE_2 $INSTALL_RSP $PERL_INSTALL_FILE $INSTALL_DIR/
+COPY $INSTALL_FILE_1_LOC $INSTALL_FILE_2_LOC $INSTALL_RSP $PERL_INSTALL_FILE $INSTALL_DIR/
 COPY $RUN_FILE $CONFIG_RSP $PWD_FILE $ORACLE_BASE/
 
 # Setup filesystem and oracle user

@@ -1,42 +1,5 @@
 #!/bin/bash
 
-########### Move DB files ############
-function moveFiles {
-
-   if [ ! -d $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID ]; then
-      mkdir -p $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
-   fi;
-
-   mv $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
-   mv $ORACLE_HOME/dbs/orapw$ORACLE_SID $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
-   mv $ORACLE_HOME/network/admin/tnsnames.ora $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
-
-   # oracle user does not have permissions in /etc, hence cp and not mv
-   cp /etc/oratab $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/
-   
-   symLinkFiles;
-}
-
-########### Symbolic link DB files ############
-function symLinkFiles {
-
-   if [ ! -L $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora ]; then
-      ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/spfile$ORACLE_SID.ora $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora
-   fi;
-   
-   if [ ! -L $ORACLE_HOME/dbs/orapw$ORACLE_SID ]; then
-      ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/orapw$ORACLE_SID $ORACLE_HOME/dbs/orapw$ORACLE_SID
-   fi;
-   
-   if [ ! -L $ORACLE_HOME/network/admin/tnsnames.ora ]; then
-      ln -s $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/tnsnames.ora $ORACLE_HOME/network/admin/tnsnames.ora
-   fi;
-
-   # oracle user does not have permissions in /etc, hence cp and not ln 
-   cp $ORACLE_BASE/oradata/dbconfig/$ORACLE_SID/oratab /etc/oratab
-
-}
-
 ########### SIGINT handler ############
 function _int() {
    echo "Stopping container."
@@ -68,9 +31,9 @@ EOF
 
 ############# Create DB ################
 function createDB {
-
    # Auto generate ORACLE PWD
-   ORACLE_PWD=`openssl rand -base64 8`
+   ORACLE_PWD='pass'
+   #ORACLE_PWD=`openssl rand -base64 8`
    echo "ORACLE AUTO GENERATED PASSWORD FOR SYS, SYSTEM AND PDBAMIN: $ORACLE_PWD";
 
    cp $ORACLE_BASE/$CONFIG_RSP $ORACLE_BASE/dbca.rsp
@@ -114,10 +77,6 @@ function createDB {
 EOF
 
   rm $ORACLE_BASE/dbca.rsp
-  
-  # Move database operational files to oradata
-  moveFiles;
-
 }
 
 ############# Start DB ################
