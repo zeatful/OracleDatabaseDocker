@@ -8,7 +8,7 @@ Since this docker image is meant to persist data state as part of the container,
 
 ## Methods for importing data
 
-### Liquibase to seed databas
+### Liquibase to seed database
 Create the seed liquibase/sql statements in the project.  You can export your current data by using liquibase to create a baseline and use that as your seed.
 
 ### Use Oracle data pump to import data to container
